@@ -1,0 +1,61 @@
+name: Build module
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout widget repo
+        uses: actions/checkout@v4
+        with:
+          path: widget
+
+      - name: Checkout magic-frame
+        uses: actions/checkout@v4
+        with:
+          repository: jeremiaa/magic-frame
+          path: magic-frame
+          ref: 1719c73
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install esbuild for build script
+        working-directory: magic-frame
+        run: npm ci --no-audit --no-fund
+
+      - name: Typecheck widget
+        working-directory: widget
+        run: |
+          npm ci --no-audit --no-fund
+          npm run typecheck
+
+      - name: Build module bundle
+        run: node magic-frame/scripts/build-module.mjs widget/src/widget.tsx widget/dist
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mvg-widget
+          path: widget/dist/
+
+      - name: Create GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            widget/dist/module.json
+            widget/dist/bundle.js
+          generate_release_notes: true
+          fail_on_unmatched_files: true

@@ -24,7 +24,7 @@ jobs:
         with:
           repository: jeremiaa/magic-frame
           path: magic-frame
-          ref: 1719c73
+          ref: v1.0.7
 
       - name: Setup Node
         uses: actions/setup-node@v4

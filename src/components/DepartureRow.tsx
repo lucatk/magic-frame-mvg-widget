@@ -15,8 +15,12 @@ import {
 export function DepartureRow({ d, now }: { d: Departure; now: number }) {
   const mins = minutesUntil(d.time, now);
   const delayed = d.realtime && (d.delay ?? 0) > 0;
-  const iconSrc = SYSTEM_ICONS[d.transportType];
-  const sys = SYSTEM_BADGES[d.transportType];
+  // Rail-replacement: API tags these as the substitute vehicle (e.g. BUS) but
+  // with `sev: true`. Show the SEV system badge regardless of the carrier
+  // and keep the original line label/colour ("U6" stays U-Bahn blue).
+  const systemType = d.sev ? "SEV" : d.transportType;
+  const iconSrc = SYSTEM_ICONS[systemType];
+  const sys = SYSTEM_BADGES[systemType];
   const line = lineBadgeColor(d.line, d.transportType);
   return (
     <div

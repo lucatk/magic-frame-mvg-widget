@@ -31,7 +31,12 @@ export const TRANSPORT_TYPE_META: Record<
   SCHIFF: { label: "Schiff", icon: "mdi:ferry" },
 };
 
-/** All transport types except SEV (replacement service) — matches Python `TransportType.all()`. */
+/**
+ * All transport types accepted by the API's `transportTypes` filter.
+ * SEV is intentionally omitted — passing it triggers a 400. Rail-replacement
+ * services come back tagged with their original transport type plus a
+ * separate `sev: true` flag on the departure.
+ */
 export const ALL_TRANSPORT_TYPES: TransportType[] = [
   "BAHN",
   "SBAHN",
@@ -70,6 +75,8 @@ export interface Departure {
   /** Material-design icon name ("mdi:subway", …). */
   icon: string;
   cancelled: boolean;
+  /** True when this is a rail-replacement service (Schienenersatzverkehr). */
+  sev: boolean;
   /** Raw message objects from the API — shape varies; treat as opaque. */
   messages: unknown[];
 }
@@ -153,6 +160,7 @@ interface RawDeparture {
   destination: string;
   transportType: TransportType;
   cancelled?: boolean;
+  sev?: boolean;
   messages?: unknown[];
 }
 
@@ -265,6 +273,7 @@ export async function departures(
       type: meta.label,
       icon: meta.icon,
       cancelled: !!d.cancelled,
+      sev: !!d.sev,
       messages: d.messages ?? [],
     };
   });

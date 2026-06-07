@@ -31,6 +31,34 @@ export const manifest: MagicFrameManifest = {
       type: "number",
       default: 0,
     },
+    {
+      key: "theme",
+      label: "Theme",
+      type: "text",
+      default: "lightVehicle",
+      help: "lightVehicle (hell, Fahrgastinformations-Look), darkStation (dunkel, Bahnhofs-Look mit schwarzem Hintergrund) oder transparentStation (Bahnhofs-Look ohne Hintergrund).",
+    },
+    {
+      key: "boxPadding",
+      label: "Innerer Abstand",
+      type: "boolean",
+      default: true,
+      help: "Wenn aktiv, hat das Board einen kleinen Innenabstand zur Kachel. Bei deaktiviertem Hintergrund (transparentStation) ggf. ausschalten.",
+    },
+    {
+      key: "refreshIndicator",
+      label: "Aktualisierungsanzeige",
+      type: "boolean",
+      default: false,
+      help: "Kleiner Punkt unten rechts, der bis zur nächsten Aktualisierung anwächst.",
+    },
+    {
+      key: "refreshSeconds",
+      label: "Aktualisierungsintervall (Sek.)",
+      type: "number",
+      default: 60,
+      help: "Wie oft die Abfahrten neu geladen werden. Bereich 30–300 Sekunden.",
+    },
   ],
 };
 

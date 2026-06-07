@@ -245,9 +245,18 @@ export async function departures(
     throw new RangeError("Invalid format of global station ID.");
   }
   const types = opts.transportTypes ?? ALL_TRANSPORT_TYPES;
+  const requestedLimit = opts.limit ?? DEFAULT_LIMIT;
+  // The API applies `limit` AFTER the transport-type filter, so a small
+  // limit + narrow filter often returns fewer matches than asked. When the
+  // caller explicitly filtered, over-fetch (capped at the API's hard limit
+  // of 100) and slice to the requested count after mapping.
+  const userFiltered = !!opts.transportTypes;
+  const apiLimit = userFiltered
+    ? Math.min(100, requestedLimit * 3)
+    : requestedLimit;
   const url = buildUrl(FIB_BASE, "/departures", {
     globalId: stationId,
-    limit: opts.limit ?? DEFAULT_LIMIT,
+    limit: apiLimit,
     offsetInMinutes: opts.offsetInMinutes ?? 0,
     transportTypes: types.join(","),
   });
@@ -255,7 +264,7 @@ export async function departures(
   if (!Array.isArray(r)) {
     throw new MvgApiError("Bad API call: Expected list.");
   }
-  return r.map((d) => {
+  const mapped = r.map((d) => {
     const meta = TRANSPORT_TYPE_META[d.transportType] ?? {
       label: String(d.transportType ?? ""),
       icon: "",
@@ -277,6 +286,7 @@ export async function departures(
       messages: d.messages ?? [],
     };
   });
+  return userFiltered ? mapped.slice(0, requestedLimit) : mapped;
 }
 
 /** All lines, or lines serving a specific station if `stationId` is given. */

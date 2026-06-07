@@ -1,16 +1,7 @@
-// Display helpers — colors, SVG icons, font injection, time formatting.
-// Anything that's "what to put on screen" but isn't a component lives here.
+// Shared display data — MVG colors, SVG icons, time helpers. Theme-specific
+// styling (fonts, backgrounds, header rules) lives inside each theme file.
 
 import type { TransportType } from "./data/mvg";
-
-// ---------------------------------------------------------------------------
-// Style constants
-// ---------------------------------------------------------------------------
-
-export const FONT_STACK =
-  '"Atkinson Hyperlegible", "Helvetica Neue", Helvetica, Arial, sans-serif';
-export const DARK_TEXT = "#0d2a5b";
-export const MUTED_TEXT = "#3c3c3c";
 
 // ---------------------------------------------------------------------------
 // MVG line / system colors
@@ -105,18 +96,3 @@ export function minutesUntil(unixSec: number, nowMs: number): number {
   return Math.max(0, Math.round((unixSec * 1000 - nowMs) / 60000));
 }
 
-// ---------------------------------------------------------------------------
-// Font loading (Atkinson Hyperlegible, via Google Fonts)
-// ---------------------------------------------------------------------------
-
-export function ensureFont(): void {
-  if (typeof document === "undefined") return;
-  const id = "magic-frame-mvg-atkinson";
-  if (document.getElementById(id)) return;
-  const link = document.createElement("link");
-  link.id = id;
-  link.rel = "stylesheet";
-  link.href =
-    "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap";
-  document.head.appendChild(link);
-}

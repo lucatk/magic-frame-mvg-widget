@@ -1,5 +1,7 @@
 # magic-frame-mvg-widget
 
+<img width="495" height="248" alt="Screenshot 2026-06-07 at 01 27 04" src="https://github.com/user-attachments/assets/a032c873-d5a0-436b-9347-ee5c945dcbe3" />
+
 Widget module for [Magic Frame](https://github.com/jeremiaa/magic-frame) that shows
 live MVG departure boards for one or more Munich public-transport stops.
 

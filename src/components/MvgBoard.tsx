@@ -27,6 +27,15 @@ function resolveRefreshMs(raw: unknown): number {
   return Math.min(REFRESH_MAX_S, Math.max(REFRESH_MIN_S, sec)) * 1000;
 }
 
+const CYCLE_MIN_S = 3;
+const CYCLE_DEFAULT_S = 10;
+
+function resolveCycleMs(raw: unknown): number {
+  const n = Number(raw);
+  const sec = Number.isFinite(n) && n > 0 ? n : CYCLE_DEFAULT_S;
+  return Math.max(CYCLE_MIN_S, sec) * 1000;
+}
+
 export type StopConfig = {
   stop: string;
   transportTypes?: TransportType[];
@@ -83,6 +92,11 @@ export function MvgBoard({ ctx }: { ctx: MagicFrameCtx }) {
   const boxPadding = ctx.config.boxPadding !== false;
   const showRefreshIndicator = ctx.config.refreshIndicator === true;
   const refreshMs = resolveRefreshMs(ctx.config.refreshSeconds);
+  // 0 / empty = show every stop at once (no cycling).
+  const perPage = Math.max(0, Math.floor(Number(ctx.config.stationsPerPage) || 0));
+  const pageCount =
+    perPage > 0 && perPage < stops.length ? Math.ceil(stops.length / perPage) : 1;
+  const cycleMs = resolveCycleMs(ctx.config.cycleSeconds);
 
   // Single "now" tick shared by every section so all minute counters update
   // in lockstep without each section running its own timer.
@@ -93,6 +107,18 @@ export function MvgBoard({ ctx }: { ctx: MagicFrameCtx }) {
   // is keyed on this tick so its CSS animation restarts exactly when the
   // fetches do.
   const [refreshTick, setRefreshTick] = useState<number>(0);
+
+  const [page, setPage] = useState<number>(0);
+
+  useEffect(() => {
+    setPage(0);
+    if (pageCount <= 1) return;
+    const id = window.setInterval(
+      () => setPage((p) => (p + 1) % pageCount),
+      cycleMs,
+    );
+    return () => window.clearInterval(id);
+  }, [pageCount, cycleMs]);
 
   useEffect(() => {
     theme.onMount?.();
@@ -126,18 +152,29 @@ export function MvgBoard({ ctx }: { ctx: MagicFrameCtx }) {
         ...theme.boardStyle,
       }}
     >
+      {/* Every section stays mounted so off-page stops keep refreshing and
+          appear already filled in; cycling only toggles `display`. */}
       {stops.map((cfg, i) => (
-        <StationSection
+        <div
           key={`${i}-${cfg.stop}`}
-          ctx={ctx}
-          stop={cfg.stop}
-          transportTypes={cfg.transportTypes}
-          limit={limit}
-          offset={offset}
-          now={now}
-          theme={theme}
-          refreshTick={refreshTick}
-        />
+          style={{
+            display:
+              pageCount > 1 && Math.floor(i / perPage) !== page
+                ? "none"
+                : "contents",
+          }}
+        >
+          <StationSection
+            ctx={ctx}
+            stop={cfg.stop}
+            transportTypes={cfg.transportTypes}
+            limit={limit}
+            offset={offset}
+            now={now}
+            theme={theme}
+            refreshTick={refreshTick}
+          />
+        </div>
       ))}
       {showRefreshIndicator ? (
         <div

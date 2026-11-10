@@ -8,7 +8,7 @@ export const manifest: MagicFrameManifest = {
   label: "MVG Abfahrten",
   description: "Live MVG departures for a station.",
   iconEmoji: "🚊",
-  version: "0.1.0",
+  version: "0.2.0",
   author: "lucakillmaier",
   fields: [
     {
@@ -18,6 +18,20 @@ export const manifest: MagicFrameManifest = {
       placeholder: "z. B.\nMarienplatz\nUniversität",
       default: "Universität",
       help: "Eine Haltestelle pro Zeile (Name oder de:09162:NN ID). Optional Transport-Filter anhängen: 'Universität;BUS,TRAM'. Erlaubte Typen: UBAHN, SBAHN, TRAM, BUS, REGIONAL_BUS, BAHN, SCHIFF, SEV.",
+    },
+    {
+      key: "stationsPerPage",
+      label: "Stationen pro Seite",
+      type: "number",
+      default: 0,
+      help: "0 = alle Haltestellen gleichzeitig. Bei z. B. 2 werden jeweils zwei Haltestellen gezeigt und danach zu den nächsten gewechselt.",
+    },
+    {
+      key: "cycleSeconds",
+      label: "Wechselintervall (Sek.)",
+      type: "number",
+      default: 10,
+      help: "Wie lange eine Seite angezeigt wird, bevor zur nächsten gewechselt wird. Mindestens 3 Sekunden. Nur relevant, wenn 'Stationen pro Seite' gesetzt ist.",
     },
     {
       key: "limit",
